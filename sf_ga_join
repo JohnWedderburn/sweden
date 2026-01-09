@@ -1,0 +1,29 @@
+
+
+SELECT 
+o.CloseDate,
+o.Cart_Id__c        AS salesforce_cart_id__c,
+g.transaction_id    AS google_analytics_transaction_id,
+o.unig__Opportunity_Type__c,
+o.Generation_S4U__c,
+c.unig__Channel__c,
+c.unig__Sub_Channel__c,
+
+###Salesforce
+FROM `unhcr-s4u-dl-ana-prod.sf_non_pii.Opportunity` o
+LEFT JOIN `sf_non_pii.Campaign` AS c ON c.id = o.CampaignId
+
+###Joining Google Analytics
+
+LEFT JOIN `ga4_mart.purchases` AS g ON g.transaction_id = o.Cart_Id__c AND g.market = 'Sweden'
+
+
+
+###Adding some filters
+WHERE 
+CloseDate >= '2025-01-01'
+AND unig__Channel__c = 'Online'
+AND unig__Opportunity_Type__c = 'Single'
+
+
+ORDER BY CloseDate ASC
