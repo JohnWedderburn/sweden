@@ -1,0 +1,39 @@
+SELECT
+Generation_S4U__c,
+unig__Channel__c,
+unig__Sub_Channel__c,
+COUNT(*) AS rows_,
+COUNT(Cart_Id__c)     AS sf_transaction_count,
+COUNT(transaction_id) AS ga_transaction_count
+FROM(
+SELECT 
+o.Id,
+o.CloseDate,
+o.Generation_S4U__c,
+c.unig__Channel__c,
+c.unig__Sub_Channel__c,
+o.CampaignId,
+c.unig__Earmark__c,
+o.Cart_Id__c,
+g.transaction_id,
+o.Amount,
+o.unig__Amount_USD__c,
+o.unig__Settled_Currency_Amount__c,
+o.unig__Settled_Currency_ISO_Code__c,
+o.StageName,
+o.unig__Opportunity_Type__c,
+o.S4U_Program_Code__c
+
+ FROM `unhcr-s4u-dl-ana-prod.sf_non_pii.Opportunity` o
+
+####This obtained the earmarking label, which we will use to assign a campaign theme
+ LEFT JOIN `sf_non_pii.Campaign` AS c ON c.id = o.CampaignId
+
+  LEFT JOIN `ga4_mart.purchases` AS g ON g.transaction_id = o.Cart_Id__c
+
+
+ WHERE CloseDate >= '2025-04-08'
+)
+GROUP BY ALL
+
+ORDER BY 5 DESC
