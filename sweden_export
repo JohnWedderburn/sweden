@@ -1,0 +1,53 @@
+SELECT
+transaction_id,
+unig__Earmark__c,
+CASE 
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Winter campaign unearmarked')     THEN 'Winterisation'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Ukraine Situation conflict')      THEN 'Ukraine'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Afghanistan')                     THEN 'Afghanistan'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Sudan')                           THEN 'Sudan'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Winter Campaign Ukraine')         THEN 'Ukraine'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Myanmar situation')               THEN 'Myanmar'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Yemen Situation Conflict')        THEN 'Yemen'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'Unearmarked')                     THEN 'General'
+WHEN REGEXP_CONTAINS(unig__Earmark__c, 'DRC Situation')                   THEN 'DRC'
+
+
+ELSE 'Emergency cannot be identified' END AS campaign_theme
+
+
+
+FROM (
+
+
+SELECT 
+--o.Id,
+o.CloseDate,
+o.Generation_S4U__c,
+c.unig__Earmark__c,
+c.unig__Channel__c,
+c.unig__Sub_Channel__c,
+o.CampaignId,
+o.Cart_Id__c,
+g.transaction_id,
+o.Amount,
+o.unig__Amount_USD__c,
+o.unig__Settled_Currency_Amount__c,
+o.unig__Settled_Currency_ISO_Code__c,
+o.StageName,
+o.unig__Opportunity_Type__c,
+o.S4U_Program_Code__c
+
+ FROM `unhcr-s4u-dl-ana-prod.sf_non_pii.Opportunity` o
+
+####This obtained the earmarking label, which we will use to assign a campaign theme
+ LEFT JOIN `sf_non_pii.Campaign` AS c ON c.id = o.CampaignId
+
+  LEFT JOIN `ga4_mart.purchases` AS g ON g.transaction_id = o.Cart_Id__c
+
+
+ WHERE CloseDate >= '2025-04-08'
+
+ AND g.transaction_id IS NOT NULL
+)
+GROUP BY ALL
